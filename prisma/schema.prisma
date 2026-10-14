@@ -1,0 +1,91 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum ItemType {
+  LOST
+  FOUND
+}
+
+enum ItemStatus {
+  PENDING
+  VERIFIED
+  MATCHED
+  RETURNED
+}
+
+enum ClaimStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(USER)
+  items     Item[]
+  claims    Claim[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Category {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  items Item[]
+}
+
+model Item {
+  id          Int        @id @default(autoincrement())
+  title       String
+  description String     @db.Text
+  location    String
+  date        DateTime
+  image       String?
+  type        ItemType
+  status      ItemStatus @default(PENDING)
+
+  claims    Claim[]
+  
+  userId      Int
+  user        User       @relation(fields: [userId], references: [id])
+  
+  categoryId  Int
+  category    Category   @relation(fields: [categoryId], references: [id])
+  
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model Claim {
+  id        Int         @id @default(autoincrement())
+  proof     String      @db.Text // Bukti klaim (contoh: "Ada goresan di pojok kanan")
+  status    ClaimStatus @default(PENDING)
+  
+  userId    Int
+  user      User        @relation(fields: [userId], references: [id])
+  
+  itemId    Int
+  item      Item        @relation(fields: [itemId], references: [id])
+  
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+}
