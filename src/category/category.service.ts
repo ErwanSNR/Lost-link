@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
+import { UpdateCategoryDto } from './dto/update-category.dto';
 
 @Injectable()
 export class CategoryService {
@@ -26,5 +27,19 @@ export class CategoryService {
       throw new NotFoundException(`Kategori dengan ID ${id} tidak ditemukan`);
     }
     return category;
+  }
+
+  async update(id: number, dto: UpdateCategoryDto) {
+    await this.findOne(id);
+    return this.prisma.category.update({
+      where: { id },
+      data: dto,
+    });
+  }
+
+  async remove(id: number) {
+    await this.findOne(id);
+    await this.prisma.category.delete({ where: { id } });
+    return { id };
   }
 }

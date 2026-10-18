@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, Optional, UnauthorizedException } from '@nestjs/common';
+import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
@@ -28,16 +28,12 @@ export class AuthService {
         name: dto.name,
         email: dto.email,
         password: hashedPassword,
-        
-        role: dto.role || 'USER',
+        role: 'USER',
       },
     });
 
     const { password, ...userWithoutPassword } = user;
-    return {
-      message: 'Registrasi berhasil',
-      data: user,
-    };
+    return userWithoutPassword;
   }
 
   async login(dto: LoginDto) {
@@ -58,11 +54,12 @@ export class AuthService {
       sub: user.id,
       email: user.email,
       role: user.role,
-      
     };
 
+    const { password: _unused, ...userWithoutPassword } = user;
+
     return {
-      message: 'Login berhasil',
+      user: userWithoutPassword,
       access_token: await this.jwtService.signAsync(payload),
     };
   }

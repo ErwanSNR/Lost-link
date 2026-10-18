@@ -1,11 +1,10 @@
-//import { PartialType } from '@nestjs/swagger';
-//import { CreateClaimDto } from './create-claim.dto';
 import { IsEnum, IsNotEmpty } from 'class-validator';
 import { ClaimStatus } from '@prisma/client';
+import { ApiProperty } from '@nestjs/swagger';
 
-//export class UpdateClaimDto extends PartialType(CreateClaimDto) {
 export class UpdateClaimStatusDto {
+  @ApiProperty({ example: 'APPROVED', enum: ClaimStatus })
   @IsEnum(ClaimStatus)
   @IsNotEmpty()
-  status: ClaimStatus;
+  status!: ClaimStatus;
 }

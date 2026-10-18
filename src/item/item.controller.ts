@@ -6,6 +6,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { GetUser } from '../auth/decorators/get-user.decorator';
 import { ItemStatus, ItemType } from '@prisma/client';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ResponseMessage } from '../common/decorators/response-message.decorator';
 
 @ApiTags('items')
 @Controller('items')
@@ -15,34 +16,34 @@ export class ItemController {
   @Post()
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
+  @ResponseMessage('Laporan barang berhasil dibuat')
   create(
     @GetUser('userId') userId: number,
-    
     @Body() dto: CreateItemDto,
   ) {
     return this.itemService.create(userId, dto);
   }
 
   @Get()
+  @ResponseMessage('Daftar barang berhasil diambil')
   findAll(
-    
     @Query('type') type?: ItemType,
     @Query('status') status?: ItemStatus,
     @Query('categoryId') categoryId?: string,
     @Query('search') search?: string,
   ) {
     return this.itemService.findAll({
-      
       type,
       status,
       categoryId: categoryId ? +categoryId : undefined,
       search,
     });
   }
-  
-@Get(':id/matches')
+
+  @Get(':id/matches')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
+  @ResponseMessage('Rekomendasi kecocokan berhasil diambil')
   getSmartMatches(
     @Param('id', ParseIntPipe) id: number,
     @GetUser('userId') userId: number,
@@ -51,6 +52,7 @@ export class ItemController {
   }
 
   @Get(':id')
+  @ResponseMessage('Detail barang berhasil diambil')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.itemService.findOne(id);
   }
@@ -58,6 +60,7 @@ export class ItemController {
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
+  @ResponseMessage('Barang berhasil diperbarui')
   update(
     @Param('id', ParseIntPipe) id: number,
     @GetUser('userId') userId: number,
@@ -70,6 +73,7 @@ export class ItemController {
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
+  @ResponseMessage('Barang berhasil dihapus')
   remove(
     @Param('id', ParseIntPipe) id: number,
     @GetUser('userId') userId: number,

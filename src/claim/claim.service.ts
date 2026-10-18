@@ -56,7 +56,7 @@ export class ClaimService {
     });
   }
 
-  async updateStatus(claimId: number, userId: number, dto: UpdateClaimStatusDto) {
+    async updateStatus(claimId: number, userId: number, role: string, dto: UpdateClaimStatusDto) {
     const claim = await this.prisma.claim.findUnique({
       where: { id: claimId },
       include: { item: true },
@@ -64,9 +64,11 @@ export class ClaimService {
 
     if (!claim) throw new NotFoundException('Klaim tidak ditemukan');
 
-    // Hanya pembuat laporan barang (Item) yang berhak mengubah status klaim
-    if (claim.item.userId !== userId) {
-      throw new ForbiddenException('Hanya pembuat laporan yang dapat memproses klaim ini');
+    // Yang berhak memproses klaim: pembuat laporan barang ATAU admin
+    const isReporter = claim.item.userId === userId;
+    const isAdmin = role === 'ADMIN';
+    if (!isReporter && !isAdmin) {
+      throw new ForbiddenException('Hanya pembuat laporan atau admin yang dapat memproses klaim ini');
     }
 
     const updatedClaim = await this.prisma.claim.update({

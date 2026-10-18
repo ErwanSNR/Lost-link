@@ -60,10 +60,18 @@ export class ItemService {
     return item;
   }
 
-  async update(id: number, userId: number, role: string, dto: UpdateItemDto) {
+    async update(id: number, userId: number, role: string, dto: UpdateItemDto) {
     const item = await this.findOne(id);
-    if (item.userId !== userId && role !== 'ADMIN') {
+    const isOwner = item.userId === userId;
+    const isAdmin = role === 'ADMIN';
+
+    if (!isOwner && !isAdmin) {
       throw new ForbiddenException('Kamu tidak memiliki akses untuk merubah item ini');
+    }
+
+    // Perubahan status (verifikasi) HANYA boleh dilakukan admin, bukan pemilik laporan
+    if (dto.status !== undefined && !isAdmin) {
+      throw new ForbiddenException('Hanya admin yang dapat mengubah status verifikasi barang');
     }
 
     return this.prisma.item.update({
